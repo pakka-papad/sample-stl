@@ -17,6 +17,8 @@ namespace sample {
 
         void reserve(const size_t &new_cap);
 
+        void resize(const size_t &new_size);
+
         void push_back(const T &value);
 
         void pop_back();
@@ -33,6 +35,7 @@ namespace sample {
     vector<T>::vector() {
         _size = 0;
         _capacity = 0;
+        _data = nullptr;
     }
 
     template<typename T>
@@ -52,8 +55,27 @@ namespace sample {
         for (int i = 0; i < _size; i++) {
             new_data[i] = _data[i];
         }
+        if (_data != nullptr) {
+            delete[] _data;
+        }
         _data = new_data;
         _capacity = new_cap;
+    }
+
+    template<typename T>
+    void vector<T>::resize(const size_t &new_size) {
+        if (new_size == _size) return;
+        if (new_size > _size) {
+            reserve(new_size);
+            for (int i = _size; i < new_size; i++) {
+                new (&_data[i])T(); // https://isocpp.org/wiki/faq/dtors#placement-new
+            }
+        } else {
+            for (int i = new_size; i < _size; i++) {
+                _data[i].~T();
+            }
+        }
+        _size = new_size;
     }
 
     template<typename T>
