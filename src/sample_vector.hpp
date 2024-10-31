@@ -11,9 +11,11 @@ namespace sample {
         public:
         vector();
 
-        size_t size();
+        size_t size() const noexcept;
 
-        void resize(const size_t &count);
+        size_t capacity() const noexcept;
+
+        void reserve(const size_t &new_cap);
 
         void push_back(const T &value);
 
@@ -34,33 +36,36 @@ namespace sample {
     }
 
     template<typename T>
-    size_t vector<T>::size() {
+    size_t vector<T>::size() const noexcept {
         return _size;
     }
 
     template<typename T>
-    void vector<T>::resize(const size_t &count) {
-        if (count == _capacity) return;
-        T* new_data = new T[count];
-        size_t n = (_size < count ? _size : count);
-        for (int i = 0; i < n; i++) {
+    size_t vector<T>::capacity() const noexcept {
+        return _capacity;
+    }
+
+    template<typename T>
+    void vector<T>::reserve(const size_t &new_cap) {
+        if (new_cap <= _capacity) return;
+        T* new_data = new T[new_cap];
+        for (int i = 0; i < _size; i++) {
             new_data[i] = _data[i];
         }
         _data = new_data;
-        _capacity = count;
-        _size = n;
+        _capacity = new_cap;
     }
 
     template<typename T>
     void vector<T>::push_back(const T &value) {
         if (_capacity == 0) {
-            resize(1);
+            reserve(1);
             _data[0] = value;
             _size++;
             return;
         }
         if (_size >= _capacity) {
-            resize((_capacity << 1));
+            reserve((_capacity << 1));
         }
         _data[_size] = value;
         _size++;
@@ -77,7 +82,7 @@ namespace sample {
     template<typename T>
     T& vector<T>::operator[](const size_t &pos) {
         if (pos < 0) {
-            throw std::runtime_error("Trying to access elements with negative index");
+            throw std::runtime_error("Accessing element at negative index");
         }
         if (pos >= _size) {
             throw std::runtime_error("Out of bounds access");
