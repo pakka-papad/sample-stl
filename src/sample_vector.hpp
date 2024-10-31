@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <algorithm>
 
 namespace sample {
 
@@ -52,9 +53,7 @@ namespace sample {
     void vector<T>::reserve(const size_t &new_cap) {
         if (new_cap <= _capacity) return;
         T* new_data = new T[new_cap];
-        for (int i = 0; i < _size; i++) {
-            new_data[i] = _data[i];
-        }
+        std::uninitialized_copy(_data, _data + _size * sizeof(T), new_data);
         if (_data != nullptr) {
             delete[] _data;
         }
