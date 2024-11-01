@@ -52,10 +52,15 @@ namespace sample {
     template<typename T>
     void vector<T>::reserve(const size_t &new_cap) {
         if (new_cap <= _capacity) return;
-        T* new_data = new T[new_cap];
-        std::uninitialized_copy(_data, _data + _size * sizeof(T), new_data);
+        T* new_data = static_cast<T*>(operator new[](new_cap * sizeof(T)));
+        if (new_data == nullptr) {
+            throw std::bad_alloc();
+        }
+        for (int i = 0; i < _size; i++) {
+            new_data[i] = _data[i];
+        }
         if (_data != nullptr) {
-            delete[] _data;
+            operator delete[](_data);
         }
         _data = new_data;
         _capacity = new_cap;
@@ -98,6 +103,7 @@ namespace sample {
             throw std::runtime_error("pop_back() called on vector of size 0.\n");
         }
         _size--;
+        _data[_size].~T();
     }
 
     template<typename T>

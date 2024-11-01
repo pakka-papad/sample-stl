@@ -2,25 +2,47 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+
+int t = 1;
+
+class A {
+    public:
+    int x;
+    A() {
+        x = t;
+        t++;
+        std::cout << "A constructor called " << x << '\n';
+    }
+    A(const A& other) {
+        this->x = other.x;
+        std::cout << "A copy constructor called " << x << '\n';
+    }
+    void print(){
+        std::cout << "A print called " << x << '\n';
+    }
+};
 
 int main() {
-    sample::vector<std::string> v;
-    v.push_back("Hello");
-    v.push_back("World");
-    std::cout << v[1] << '\n';
-    v[1] = "Sumit";
-    std::cout << v[1] << '\n';
-    v.resize(1);
-    std::cout << v[0] << '\n';
-    v.resize(10);
-
-
-    sample::vector<int> vi;
-    vi.push_back(7);
-    vi.push_back(5);
-    std::cout << vi[0] << ' ' << vi[1] << '\n';
-    vi.resize(10);
-    std::cout << vi[0] << ' ' << vi[1] << ' ' << vi[2] << '\n';
-    vi.resize(1);
+    std::vector<A> stdv;
+    sample::vector<A> samv;
+    for(int i = 0; i < 5; i++){
+        std::cout << "\tPushing " << t << "\n";
+        stdv.push_back(A());
+        std::cout << "\tPushed " << t-1 << "\n";
+    }
+    for(int i = 0; i < 5; i++){
+        std::cout << "\tPushing " << t << "\n";
+        samv.push_back(A());
+        std::cout << "\tPushed " << t-1 << "\n";
+    }
+    for(int i = 0; i < 5; i++){
+        stdv[i].print();
+    }
+    for(int i = 0; i < 5; i++){
+        samv[i].print();
+    }
+    samv[0] = A();
+    A x = samv[0];
     return EXIT_SUCCESS;
 }
