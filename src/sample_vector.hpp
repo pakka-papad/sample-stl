@@ -60,7 +60,7 @@ namespace sample {
             new_data[i] = _data[i];
         }
         if (_data != nullptr) {
-            operator delete[](_data);
+            delete[](_data);
         }
         _data = new_data;
         _capacity = new_cap;
