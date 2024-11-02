@@ -16,6 +16,8 @@ namespace sample {
 
         size_t capacity() const noexcept;
 
+        void shrink_to_fit();
+
         void reserve(const size_t &new_cap);
 
         void resize(const size_t &new_size);
@@ -23,6 +25,8 @@ namespace sample {
         void push_back(const T &value);
 
         void pop_back();
+
+        void clear();
 
         T& operator[](const size_t &pos);
 
@@ -47,6 +51,22 @@ namespace sample {
     template<typename T>
     size_t vector<T>::capacity() const noexcept {
         return _capacity;
+    }
+
+    template<typename T>
+    void vector<T>::shrink_to_fit() {
+        if (_capacity <= _size || _data == nullptr) return;
+        T* new_data = (_size == 0 ? nullptr : 
+            static_cast<T*>(operator new[](_size * sizeof(T))));
+        if (_size != 0 && new_data == nullptr) {
+            throw std::bad_alloc();
+        }
+        for (int i = 0; i < _size; i++) {
+            new_data[i] = _data[i];
+        }
+        delete[](_data);
+        _data = new_data;
+        _capacity = _size;
     }
 
     template<typename T>
@@ -100,6 +120,11 @@ namespace sample {
         }
         _size--;
         _data[_size].~T();
+    }
+
+    template<typename T>
+    void vector<T>::clear() {
+        resize(0);
     }
 
     template<typename T>
