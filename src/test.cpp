@@ -49,7 +49,14 @@ int main() {
     for(int i = 0; i < 5; i++){
         samv[i].print();
     }
-    samv[0] = A();
-    A x = samv[0];
+    stdv.begin();
+    for (auto &a: samv) {
+        std::cout << a.x << ' ';
+    }
+    std::cout << '\n';
+    for (auto it = samv.begin(); it != samv.end(); it++) {
+        std::cout << it->x << ' ';
+    }
+    std::cout << '\n';
     return EXIT_SUCCESS;
 }

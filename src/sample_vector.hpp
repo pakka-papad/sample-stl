@@ -30,6 +30,30 @@ namespace sample {
 
         T& operator[](const size_t &pos);
 
+        class iterator {
+            public:
+            iterator& operator++();
+
+            iterator operator++(int);
+
+            T& operator*();
+
+            bool operator==(const iterator &other) const noexcept;
+
+            bool operator!=(const iterator &other) const noexcept;
+
+            T* operator->() const noexcept;
+            
+            iterator(T* ptr);
+
+            private:
+            T* ptr = nullptr;
+        };
+
+        iterator begin();
+
+        iterator end();
+
         private:
         T* _data;
         size_t _size;
@@ -136,6 +160,54 @@ namespace sample {
             throw std::runtime_error("Out of bounds access");
         }
         return _data[pos];
+    }
+
+    template<typename T>
+    typename vector<T>::iterator vector<T>::begin() {
+        return vector<T>::iterator(_data);
+    }
+
+    template<typename T>
+    typename vector<T>::iterator vector<T>::end() {
+        return vector<T>::iterator(_data + _size);
+    }
+
+    template<typename T>
+    vector<T>::iterator::iterator(T* ptr) {
+        this->ptr = ptr;
+    }
+
+    template<typename T>
+    typename vector<T>::iterator& vector<T>::iterator::operator++() {
+        this->ptr++;
+        return *this;
+    }
+
+    template<typename T>
+    typename vector<T>::iterator vector<T>::iterator::operator++(int) {
+        this->ptr++;
+        vector<T>::iterator _temp(this->ptr);
+        return _temp;
+    }
+
+    template<typename T>
+    T& vector<T>::iterator::operator*() {
+        return *(this->ptr);
+    }
+
+    template<typename T>
+    bool vector<T>::iterator::operator==(const iterator &other) const noexcept {
+        return (this->ptr == other.ptr);
+    }
+
+    template<typename T>
+    bool vector<T>::iterator::operator!=(const iterator &other) const noexcept {
+        return (this->ptr != other.ptr);
+    }
+
+    template<typename T>
+    T* vector<T>::iterator::operator->() const noexcept {
+        return this->ptr;
     }
 }
 
