@@ -86,11 +86,7 @@ namespace sample {
     void vector<T>::push_back(const T &value) {
         if (_capacity == 0) {
             reserve(1);
-            _data[0] = value;
-            _size++;
-            return;
-        }
-        if (_size >= _capacity) {
+        } else if (_size >= _capacity) {
             reserve((_capacity << 1));
         }
         _data[_size] = value;

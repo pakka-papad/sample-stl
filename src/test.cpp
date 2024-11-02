@@ -18,6 +18,13 @@ class A {
         this->x = other.x;
         std::cout << "A copy constructor called " << x << '\n';
     }
+    A& operator=(const A& other) {
+        if (this != &other) {
+            this->x = other.x;
+            std::cout << "A assignment operator called " << x << '\n';
+        }
+        return *this;
+    }
     void print(){
         std::cout << "A print called " << x << '\n';
     }
