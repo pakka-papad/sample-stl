@@ -8,3 +8,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(test_vector src/test_vector.cpp)
 add_executable(test_unordered_map src/test_unordered_map.cpp)
+add_executable(test_forward_list src/test_forward_list.cpp)
