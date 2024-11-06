@@ -43,10 +43,12 @@ namespace sample {
             bool operator!=(const iterator &other) const noexcept;
 
             T* operator->() const noexcept;
+
+            private:
+            friend class vector<T>;
             
             iterator(T* ptr);
 
-            private:
             T* ptr = nullptr;
         };
 
