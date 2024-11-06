@@ -52,6 +52,10 @@ int main() {
         l.emplace_front();
         std::cout << "\tPushed " << t-1 << "\n";
     }
+    l.clear();
+    l.emplace_front();
+    l.pop_front();
+    std::cout << l.size() << '\n';
     return EXIT_SUCCESS;
 }
 

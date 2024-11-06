@@ -69,6 +69,7 @@ namespace sample {
     template<typename T>
     forward_list<T>::forward_list() {
         _head = nullptr;
+        _size = 0;
     }
 
     template<typename T>
@@ -132,6 +133,7 @@ namespace sample {
             delete(n);
             _size--;
         }
+        _head = nullptr;
     }
 
     template<typename T>
