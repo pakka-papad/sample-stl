@@ -37,8 +37,21 @@ int main() {
         l.push_front(A());
         std::cout << "\tPushed " << t-1 << "\n";
     }
+    for (auto it = l.begin(); it != l.end(); ++it) {
+        std::cout << it->x << ' ';
+    }
+    std::cout << '\n';
+    for (auto &a: l) {
+        std::cout << a.x << ' ';
+    }
+    std::cout << '\n';
     l.pop_front();
     l.clear();
+    for (int i = 0; i < 3; i++) {
+        std::cout << "\tPushing " << t << "\n";
+        l.emplace_front();
+        std::cout << "\tPushed " << t-1 << "\n";
+    }
     return EXIT_SUCCESS;
 }
 
