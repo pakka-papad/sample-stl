@@ -47,11 +47,24 @@ int main() {
     std::cout << '\n';
     l.pop_front();
     l.clear();
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         std::cout << "\tPushing " << t << "\n";
         l.emplace_front();
         std::cout << "\tPushed " << t-1 << "\n";
     }
+    std::cout << "Before erase_after\n";
+    for (auto &a: l) {
+        std::cout << a.x << " ";
+    }
+    std::cout << '\n';
+    l.erase_after(l.begin());
+    l.erase_after(l.begin());
+    l.erase_after(l.begin());
+    std::cout << "After erase_after\n";
+    for (auto &a: l) {
+        std::cout << a.x << " ";
+    }
+    std::cout << '\n';
     l.clear();
     l.emplace_front();
     l.pop_front();

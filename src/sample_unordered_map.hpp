@@ -37,6 +37,12 @@ namespace sample {
 
         void reHash(size_t size);
 
+        float inline getLoadFactor();
+
+        constexpr static float MAX_LOAD_FACTOR = 0.75f;
+        constexpr static float MIN_LOAD_FACTOR = 0.422f;
+        constexpr static int MIN_SLOTS = 16;
+
         public:
         unordered_map(); 
 
@@ -47,6 +53,8 @@ namespace sample {
         void insert(Key key, Value value);
 
         Value& operator[](Key key);
+
+        void erase(Key key);
     };
 
 
@@ -92,23 +100,33 @@ namespace sample {
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    float inline unordered_map<Key, Value, Hash, KeyEqual>::getLoadFactor() {
+        return (float)_keys/(float)_slots;
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
     size_t unordered_map<Key, Value, Hash, KeyEqual>::size() {
         return _keys;
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
     void unordered_map<Key, Value, Hash, KeyEqual>::clear() {
-    
+        if (_data == nullptr) return;
+        for (size_t i = 0; i < _slots; ++i) {
+            _data[i].clear();
+        }
+        _keys = 0;
+        reHash(MIN_SLOTS);
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
     void unordered_map<Key, Value, Hash, KeyEqual>::insert(Key key, Value value) {
         if (_data == nullptr) {
-            reHash(15);
+            reHash(MIN_SLOTS);
         }
         entry e(key, value, _hash);
         size_t pos = getPos(e.hash);
-        std::cout << "insert key: " << key << ", hash: " << e.hash << ", pos: " << pos << "\n";
+        std::cout << "get key: " << key << ", hash: " << e.hash << ", pos: " << pos << ", chain_length: " << _data[pos].size() << ", slots: " << _slots << "\n";
         typename forward_list<entry>::iterator it = _data[pos].begin();
         typename forward_list<entry>::iterator end = _data[pos].end();
         while (it != end) {
@@ -120,13 +138,16 @@ namespace sample {
         }
         _data[pos].push_front(e);
         _keys++;
+        if (getLoadFactor() >= MAX_LOAD_FACTOR) {
+            reHash(_slots << 1);
+        }
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
     Value& unordered_map<Key, Value, Hash, KeyEqual>::operator[](Key key) {
         uint32_t hash = _hash(key);
         size_t pos = getPos(hash);
-        std::cout << "get key: " << key << ", hash: " << hash << ", pos: " << pos << "\n";
+        std::cout << "get key: " << key << ", hash: " << hash << ", pos: " << pos << ", chain_length: " << _data[pos].size() << ", slots: " << _slots << "\n";
         typename forward_list<entry>::iterator it = _data[pos].begin();
         typename forward_list<entry>::iterator end = _data[pos].end();
         while (it != end) {
@@ -136,6 +157,39 @@ namespace sample {
             ++it;
         }
         throw std::runtime_error("Key not found.");
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    void unordered_map<Key, Value, Hash, KeyEqual>::erase(Key key) {
+        uint32_t hash = _hash(key);
+        size_t pos = getPos(hash);
+        std::cout << "erase key: " << key << ", hash: " << hash << ", pos: " << pos << ", chain_length: " << _data[pos].size() << ", slots: " << _slots << "\n";
+        if (_data[pos].size() == 0) return;
+        typename forward_list<entry>::iterator it = _data[pos].begin();
+        typename forward_list<entry>::iterator end = _data[pos].end();
+        if (_key_equal(key, it->key)) {
+            _data[pos].pop_front();
+            _keys--;
+            if (getLoadFactor() < MIN_LOAD_FACTOR) {
+                reHash(_slots >> 1);
+            }
+            return;
+        }
+        typename forward_list<entry>::iterator prev = it;
+        ++it;
+        while (it != end) {
+            if (_key_equal(key, it->key)) {
+                _data[pos].erase_after(prev);
+                _keys--;
+                if (getLoadFactor() < MIN_LOAD_FACTOR) {
+                    reHash(_slots >> 1);
+                }
+                return;
+            }
+            prev = it;
+            ++it;
+        }
+        std::cout << "key not found: " << key << "\n";
     }
 }
 

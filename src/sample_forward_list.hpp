@@ -64,6 +64,8 @@ namespace sample {
         iterator begin();
 
         iterator end();
+
+        void erase_after(const iterator pos);
     };
 
     template<typename T>
@@ -185,6 +187,16 @@ namespace sample {
     template<typename T>
     typename forward_list<T>::iterator forward_list<T>::end() {
         return forward_list<T>::iterator(nullptr);
+    }
+
+    template<typename T>
+    void forward_list<T>::erase_after(const iterator pos) {
+        if (pos._ptr == nullptr || pos._ptr->next == nullptr) return;
+        node* remaining = pos._ptr->next->next;
+        node* remove = pos._ptr->next;
+        delete(remove);
+        _size--;
+        pos._ptr->next = remaining;
     }
 }
 
