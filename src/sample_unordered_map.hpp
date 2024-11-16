@@ -3,7 +3,6 @@
 
 #include <functional>
 #include "sample_forward_list.hpp"
-#include <iostream>
 
 namespace sample {
     template<
@@ -161,7 +160,6 @@ namespace sample {
         }
         entry e(key, value, _hash);
         size_t pos = getPos(e.hash);
-        std::cout << "get key: " << key << ", hash: " << e.hash << ", pos: " << pos << ", chain_length: " << _data[pos].size() << ", slots: " << _slots << "\n";
         typename forward_list<entry>::iterator it = _data[pos].begin();
         typename forward_list<entry>::iterator end = _data[pos].end();
         while (it != end) {
@@ -182,7 +180,6 @@ namespace sample {
     Value& unordered_map<Key, Value, Hash, KeyEqual>::operator[](Key key) const {
         uint32_t hash = _hash(key);
         size_t pos = getPos(hash);
-        std::cout << "get key: " << key << ", hash: " << hash << ", pos: " << pos << ", chain_length: " << _data[pos].size() << ", slots: " << _slots << "\n";
         typename forward_list<entry>::iterator it = _data[pos].begin();
         typename forward_list<entry>::iterator end = _data[pos].end();
         while (it != end) {
@@ -198,7 +195,6 @@ namespace sample {
     void unordered_map<Key, Value, Hash, KeyEqual>::erase(Key key) {
         uint32_t hash = _hash(key);
         size_t pos = getPos(hash);
-        std::cout << "erase key: " << key << ", hash: " << hash << ", pos: " << pos << ", chain_length: " << _data[pos].size() << ", slots: " << _slots << "\n";
         if (_data[pos].size() == 0) return;
         typename forward_list<entry>::iterator it = _data[pos].begin();
         typename forward_list<entry>::iterator end = _data[pos].end();
@@ -224,7 +220,6 @@ namespace sample {
             prev = it;
             ++it;
         }
-        std::cout << "key not found: " << key << "\n";
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
