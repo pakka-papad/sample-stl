@@ -33,11 +33,11 @@ namespace sample {
 
         forward_list<entry>* _data;
 
-        size_t inline getPos(uint32_t hash);
+        size_t inline getPos(uint32_t hash) const;
 
         void reHash(size_t size);
 
-        float inline getLoadFactor();
+        float inline getLoadFactor() const;
 
         constexpr static float MAX_LOAD_FACTOR = 0.75f;
         constexpr static float MIN_LOAD_FACTOR = 0.422f;
@@ -46,15 +46,50 @@ namespace sample {
         public:
         unordered_map(); 
 
-        size_t size();
+        size_t size() const noexcept;
 
         void clear();
 
         void insert(Key key, Value value);
 
-        Value& operator[](Key key);
+        Value& operator[](Key key) const;
 
         void erase(Key key);
+
+        class iterator {
+            private:
+            friend class unordered_map<Key, Value, Hash, KeyEqual>;
+
+            forward_list<entry>* list;
+
+            typename forward_list<entry>::iterator it;
+
+            size_t& slots;
+
+            size_t cur_slot;
+
+            std::pair<Key, Value> val;
+
+            iterator(forward_list<entry>* list, typename forward_list<entry>::iterator it,
+                size_t& slots, size_t cur_slot);
+
+            public:
+            iterator& operator++();
+
+            iterator operator++(int);
+
+            std::pair<Key,Value>& operator*();
+
+            std::pair<Key,Value>* operator->();
+
+            bool operator==(const iterator &other) const noexcept;
+
+            bool operator!=(const iterator &other) const noexcept;
+        };
+
+        iterator begin();
+
+        iterator end();
     };
 
 
@@ -68,7 +103,7 @@ namespace sample {
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
-    size_t inline unordered_map<Key, Value, Hash, KeyEqual>::getPos(uint32_t hash) {
+    size_t inline unordered_map<Key, Value, Hash, KeyEqual>::getPos(uint32_t hash) const {
         return (hash%_slots);
     }
 
@@ -100,12 +135,12 @@ namespace sample {
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
-    float inline unordered_map<Key, Value, Hash, KeyEqual>::getLoadFactor() {
+    float inline unordered_map<Key, Value, Hash, KeyEqual>::getLoadFactor() const {
         return (float)_keys/(float)_slots;
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
-    size_t unordered_map<Key, Value, Hash, KeyEqual>::size() {
+    size_t unordered_map<Key, Value, Hash, KeyEqual>::size() const noexcept {
         return _keys;
     }
 
@@ -144,7 +179,7 @@ namespace sample {
     }
 
     template<typename Key, typename Value, typename Hash, typename KeyEqual>
-    Value& unordered_map<Key, Value, Hash, KeyEqual>::operator[](Key key) {
+    Value& unordered_map<Key, Value, Hash, KeyEqual>::operator[](Key key) const {
         uint32_t hash = _hash(key);
         size_t pos = getPos(hash);
         std::cout << "get key: " << key << ", hash: " << hash << ", pos: " << pos << ", chain_length: " << _data[pos].size() << ", slots: " << _slots << "\n";
@@ -190,6 +225,102 @@ namespace sample {
             ++it;
         }
         std::cout << "key not found: " << key << "\n";
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    unordered_map<Key, Value, Hash, KeyEqual>::iterator::iterator(forward_list<entry>* list, 
+        typename forward_list<entry>::iterator it, size_t& slots, 
+        size_t cur_slot): list(list), it(it), slots(slots), cur_slot(cur_slot) {
+        if (list != nullptr && it != list->end()) {
+            val.first = it->key;
+            val.second = it->value;
+        }
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    typename unordered_map<Key, Value, Hash, KeyEqual>::iterator& unordered_map<Key, Value, Hash, KeyEqual>::iterator::operator++() {
+        if (cur_slot >= slots) {
+            throw std::runtime_error("Not a valid iterator");
+        }
+        ++it;
+        if (list->end() == it) {
+            do {
+                ++list;
+                ++cur_slot;
+            } while (cur_slot < slots && list->size() == 0);
+            if (cur_slot != slots) {
+                it = list->begin();
+            } else {
+                list = nullptr;
+            }
+        }
+        if (list != nullptr && it != list->end()) {
+            val.first = it->key;
+            val.second = it->value;
+        }
+        return *this;
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    typename unordered_map<Key, Value, Hash, KeyEqual>::iterator unordered_map<Key, Value, Hash, KeyEqual>::iterator::operator++(int) {
+        if (cur_slot >= slots) {
+            throw std::runtime_error("Not a valid iterator");
+        }
+        ++it;
+        if (list->end() == it) {
+            do {
+                ++list;
+                ++cur_slot;
+            } while (cur_slot < slots && list->size() == 0);
+            if (cur_slot != slots) {
+                it = list->begin();
+            } else {
+                list = nullptr;
+            }
+        }
+        if (list != nullptr && it != list->end()) {
+            val.first = it->key;
+            val.second = it->value;
+        }
+        return unordered_map<Key, Value, Hash, KeyEqual>::iterator(list, it, slots, cur_slot);
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    std::pair<Key,Value>& unordered_map<Key, Value, Hash, KeyEqual>::iterator::operator*() {
+        return val;
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    std::pair<Key,Value>* unordered_map<Key, Value, Hash, KeyEqual>::iterator::operator->() {
+        return &val;
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    bool unordered_map<Key, Value, Hash, KeyEqual>::iterator::operator==(const iterator &other) const noexcept {
+        if (this->cur_slot >= slots && other.cur_slot >= slots) return true;
+        if (this->cur_slot >= slots || other.cur_slot >= slots) return false;
+        return (this->cur_slot == other.cur_slot && this->it == other.it);
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    bool unordered_map<Key, Value, Hash, KeyEqual>::iterator::operator!=(const iterator &other) const noexcept {
+        if (this->cur_slot >= slots && other.cur_slot >= slots) return false;
+        if (this->cur_slot >= slots || other.cur_slot >= slots) return true;
+        return (this->cur_slot != other.cur_slot || this->it != other.it);
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    typename unordered_map<Key, Value, Hash, KeyEqual>::iterator unordered_map<Key, Value, Hash, KeyEqual>::begin() {
+        size_t pos = -1;
+        do {
+            pos++;
+        } while (pos < _slots && _data[pos].size() == 0);
+        return unordered_map<Key, Value, Hash, KeyEqual>::iterator(&_data[pos], _data[pos].begin(), _slots, pos);
+    }
+
+    template<typename Key, typename Value, typename Hash, typename KeyEqual>
+    typename unordered_map<Key, Value, Hash, KeyEqual>::iterator unordered_map<Key, Value, Hash, KeyEqual>::end() {
+        return unordered_map<Key, Value, Hash, KeyEqual>::iterator(nullptr, _data[_slots-1].end(), _slots, _slots);
     }
 }
 
