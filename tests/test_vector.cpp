@@ -1,4 +1,4 @@
-#include "sample_vector.hpp"
+#include "../src/sample_vector.hpp"
 
 #include <iostream>
 #include <string>
